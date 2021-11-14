@@ -12,17 +12,20 @@ class Board {
     private Piece[][] board;
 
     public Board() {
+        initCharToInt();
+        
         board = new Piece[8][8];
         initPieces();
 
-        initCharToInt();
+        setPiece( new Cell( 'D', 3 ), new Queen( "white" ) );
+        
         List< Move > moves = getLegalMoves();
         printMoves( moves );
     }
 
     public void printMoves( List< Move > moves ) {
         for ( Move m : moves )
-            System.out.println( "[" + (char) m.from.col + "," + m.from.row + "] -> [" + (char) m.to.col + "," + m.to.row + "]" );
+            System.out.println( m );
     } 
 
     /**
@@ -87,8 +90,8 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initPawns( String color ) {
-        for ( int i = 0; i < 8; i++ )
-            board[ color.equals( "black" ) ? 1 : 6 ][ i ] = new Pawn( color );
+        for ( char i = 'A'; i <= 'H'; i++ )
+            setPiece( new Cell( i, color.equals( "black" ) ? 2 : 7 ), new Pawn( color ) );
     }
     
     /**
@@ -96,8 +99,8 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initBishops( String color ) {
-        board[ color.equals( "black" ) ? 0 : 7 ][ 2 ] = new Bishop( color );
-        board[ color.equals( "black" ) ? 0 : 7 ][ 5 ] = new Bishop( color );
+        setPiece( new Cell( 'C', color.equals( "black" ) ? 1 : 8 ), new Bishop( color ) );
+        setPiece( new Cell( 'F', color.equals( "black" ) ? 1 : 8 ), new Bishop( color ) );
     }
     
     /**
@@ -105,8 +108,8 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initKnights( String color ) {
-        board[ color.equals( "black" ) ? 0 : 7 ][ 1 ] = new Knight( color );
-        board[ color.equals( "black" ) ? 0 : 7 ][ 6 ] = new Knight( color );
+        setPiece( new Cell( 'B', color.equals( "black" ) ? 1 : 8 ), new Knight( color ) );
+        setPiece( new Cell( 'G', color.equals( "black" ) ? 1 : 8 ), new Knight( color ) );
     }
     
     /**
@@ -114,8 +117,8 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initRooks( String color ) {
-        board[ color.equals( "black" ) ? 0 : 7 ][ 0 ] = new Rook( color );
-        board[ color.equals( "black" ) ? 0 : 7 ][ 7 ] = new Rook( color );
+        setPiece( new Cell( 'A', color.equals( "black" ) ? 1 : 8), new Rook( color ) );
+        setPiece( new Cell( 'H', color.equals( "black" ) ? 1 : 8), new Rook( color ) );
     }
 
     /**
@@ -123,7 +126,7 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initQueen( String color ) {
-        board[ color.equals( "black" ) ? 0 : 7 ][ 3 ] = new Queen( color );
+        setPiece( new Cell( 'D', color.equals( "black" ) ? 1 : 8 ), new Queen( color ) );
     }
 
     /**
@@ -131,26 +134,72 @@ class Board {
      * @param color indicates what color this piece is.
      */
     private void initKing( String color ) {
-        board[ color.equals( "black" ) ? 0 : 7 ][ 4 ] = new King( color );
+        setPiece( new Cell( 'E', color.equals( "black" ) ? 1 : 8 ), new King( color ) );
+    }
+
+    /**
+     * This method returns the Piece at the given Cell.
+     * @param cell the Cell on the Board where the Piece is located.
+     * @return the Piece in the given Cell
+     */
+    private Piece getPiece( Cell cell ) {
+        return board[ cell.row - 1 ][ charToInt.get( cell.col ) - 1 ];
+    }
+
+    /**
+     * This method places the given Piece into the given Cell on the Board.
+     * @param cell the Cell to place the given Piece.
+     * @param newPiece the Piece to be places in the Cell
+     * @return the Piece that was previously in the Cell. Null if none.
+     */
+    private Piece setPiece( Cell cell, Piece newPiece ) {
+        Piece ret = getPiece( cell );
+        board[ cell.row - 1 ][ charToInt.get( cell.col ) - 1 ] = newPiece;
+        return ret;
     }
 
     /**
      * This method returns a List of legal moves that are possible based on the current Board.
      */
     public List< Move > getLegalMoves() {
-        List< Move > moves = new ArrayList<>();
+        List< Path > possiblePaths = new ArrayList<>();
 
         for ( int row = 0; row < board.length; row++ ) {
             for ( int col = 0; col < board[0].length; col++ ) {
                 Piece p = board[ row ][ col ];
                 if ( p != null ) {
                     Cell pos = new Cell( (char) ( col + 'A' ), 1 + row );
-                    moves.addAll( p.getMoves( pos ) );
+                    possiblePaths.addAll( p.getMoves( pos ) );
                 }
             }
         }
 
-        return moves;
+        // Check for same color && Pieces protected by another Piece.. Remove these.
+        for ( Path p : possiblePaths ) {
+            Move currentMove = p.head();
+            Move prev = currentMove;
+            // System.out.println( "asd" );
+            while ( currentMove != null ) {
+                Piece piece = getPiece( currentMove.from );
+                Piece target = getPiece( currentMove.to );
+                if ( target != null && target.color().equals( piece.color() ) ) { // It is a friendly piece.
+                    p.removeMove( currentMove );
+                    currentMove = p.next( prev );
+                } else if ( target != null ) { // We know it is an enemy
+                    
+                    Move next = p.next( currentMove );
+                    System.out.println( "Enemy " + getPiece( currentMove.to ) + " @ " + currentMove.to + " is a threat to " + getPiece( currentMove.from ) + " @ " + currentMove.from );
+                    if ( next != null ) 
+                        p.removeMove( next );     
+                    currentMove = null; // There can't possibly be any Moves behind this enemy, because the Piece blocks the Path.           
+                } else
+                    currentMove = p.next( currentMove );
+                prev = currentMove;
+            }
+        }
+        
+
+        return Path.extractMoves( possiblePaths );
     }
 
     /**
@@ -161,10 +210,8 @@ class Board {
         Cell from = move.from;
         Cell to = move.to;
 
-        board[ to.row -1 ][ charToInt.get( to.col ) -1 ] = board[ from.row -1 ][ charToInt.get( from.col ) -1 ];
-        board[ from.row -1 ][ charToInt.get( from.col ) -1 ] = null;
-        // System.out.println( board[ charToInt.get( to.col ) ][ to.row ].toString() + charToInt.get( to.col ) + "   " + to.row);
-
+        setPiece( to, getPiece( from ) );
+        setPiece( from, null );
     }
 
     /**

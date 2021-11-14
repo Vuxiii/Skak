@@ -15,8 +15,8 @@ public interface Piece {
      * @param pos The Cell on the board where this Piece is located.
      * @return A list of moves where this Piece can possibly move.
      */
-    public static List< Move > getPossibleMoves( Cell pos ) {
-        return new ArrayList< Move >();
+    public static List< Path > getPossibleMoves( Cell pos ) {
+        return new ArrayList< Path >();
     }
     /**
      * This method computes all of the possible moves for this Piece based on the current position and color.
@@ -24,5 +24,5 @@ public interface Piece {
      * @param pos The Cell on the board where this Piece is located.
      * @return A list of moves where this Piece can possibly move.
      */
-    public List< Move > getMoves( Cell pos );
+    public List< Path > getMoves( Cell pos );
 }

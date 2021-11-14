@@ -12,16 +12,16 @@ public class Queen implements Piece {
         return color;
     }
     
-    public static List< Move > getPossibleMoves( Cell pos ) {
-        List< Move > moves = new ArrayList<>();
-        
-        moves.addAll( Rook.getPossibleMoves( pos ) );
-        moves.addAll( Bishop.getPossibleMoves( pos ) );
+    public static List< Path > getPossibleMoves( Cell pos ) {
+        // List< Move > moves = new ArrayList<>();
+        List< Path > paths = new ArrayList<>();
+        paths.addAll( Rook.getPossibleMoves( pos ) );
+        paths.addAll( Bishop.getPossibleMoves( pos ) );
 
-        return moves;
+        return paths;
     }
     
-    public List< Move > getMoves( Cell pos ) {
+    public List< Path > getMoves( Cell pos ) {
         return Queen.getPossibleMoves( pos );
     }
 

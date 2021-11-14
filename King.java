@@ -12,35 +12,44 @@ public class King implements Piece {
         return color;
     }
     
-    public static List< Move > getPossibleMoves( Cell pos ) {
-        List< Move > moves = new ArrayList<>();
-        
+    public static List< Path > getPossibleMoves( Cell pos ) {
+        // List< Move > moves = new ArrayList<>();
+
+        List< Path > paths = new ArrayList<>();
+        Path up = new Path();
+        Path down = new Path();
+        Path left = new Path();
+        Path right = new Path();
         // Check upper bound of board.
         if ( pos.row != 1 ) {
             Cell to = new Cell( pos.col, pos.row - 1 );
-            moves.add( new Move( pos, to ) );
+            up.addMove( new Move( pos, to ) );
         }
         
         // Check lower bound of board.
         if ( pos.row != 8 ) {
             Cell to = new Cell( pos.col, pos.row + 1 );
-            moves.add( new Move( pos, to ) );
+            down.addMove( new Move( pos, to ) );
+
         }
         // Check left bound of board.
         if ( pos.col != 'A' ) {
             Cell to = new Cell( (char) (pos.col - 1), pos.row );
-            moves.add( new Move( pos, to ) );
+            left.addMove( new Move( pos, to ) );
         }
         // Check right bound of board.
         if ( pos.col != 'H' ) {
             Cell to = new Cell( (char) (pos.col + 1), pos.row );
-            moves.add( new Move( pos, to ) );
+            right.addMove( new Move( pos, to ) );
         }
-
-        return moves;
+        paths.add( up );
+        paths.add( down );
+        paths.add( left );
+        paths.add( right );
+        return paths;
     }
     
-    public List< Move > getMoves( Cell pos ) {
+    public List< Path > getMoves( Cell pos ) {
         return King.getPossibleMoves( pos );
     }
 

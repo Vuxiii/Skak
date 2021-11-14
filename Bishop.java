@@ -12,43 +12,49 @@ public class Bishop implements Piece {
         return color;
     }
     
-    public static List< Move > getPossibleMoves( Cell pos ) {
-        List< Move > moves = new ArrayList<>();
+    public static List< Path > getPossibleMoves( Cell pos ) {
+        // List< Move > moves = new ArrayList<>();
         
-        // Starts from the center.
-        // towards left top
-        for ( int row = pos.row - 1; row >= 1; row-- ) {
-            for ( char col = (char) (pos.col - 1); col >= 'A'; col-- ) {
-                Cell to = new Cell( col, row );
-                moves.add( new Move( pos, to ) ); 
-            }
+        List< Path > paths = new ArrayList<>();
+
+        Path leftUp = new Path();
+        // left up
+        for ( int i = 1; i <= pos.col - 'A' && pos.row - i >= 1; i++ ) {
+            Cell to = new Cell( (char) (pos.col - i), pos.row - i );
+            // moves.add( new Move( pos, to ) );
+            leftUp.addMove( new Move( pos, to ) );
         }
-        // towards right top
-        for ( int row = pos.row - 1; row >= 1; row-- ) {
-            for ( char col = (char) (pos.col + 1); col >= 'H'; col++ ) {
-                Cell to = new Cell( col, row );
-                moves.add( new Move( pos, to ) ); 
-            }
+        Path leftDown = new Path();
+        // left down
+        for ( int i = 1; i <= pos.col - 'A' && pos.row + i <= 8; i++ ) {
+            Cell to = new Cell( (char) (pos.col - i), pos.row + i );
+            // moves.add( new Move( pos, to ) );
+            leftDown.addMove( new Move( pos, to ) );
         }
-        // towards left bottom
-        for ( int row = pos.row + 1; row <= 8; row++ ) {
-            for ( char col = (char) (pos.col - 1); col >= 'A'; col-- ) {
-                Cell to = new Cell( col, row );
-                moves.add( new Move( pos, to ) ); 
-            }
+        Path rightUp = new Path();
+        // right up
+        for ( int i = 1; i <= 'H' - pos.col && pos.row - i >= 1; i++ ) {
+            Cell to = new Cell( (char) (pos.col + i), pos.row - i );
+            // moves.add( new Move( pos, to ) );
+            rightUp.addMove( new Move( pos, to ) );
         }
-        // towards right bottom
-        for ( int row = pos.row + 1; row <= 8; row++ ) {
-            for ( char col = (char) (pos.col + 1); col >= 'H'; col++ ) {
-                Cell to = new Cell( col, row );
-                moves.add( new Move( pos, to ) ); 
-            }
+        Path rightDown = new Path();
+        // right down
+        for ( int i = 1; i <= 'H' - pos.col && pos.row + i <= 8; i++ ) {
+            Cell to = new Cell( (char) (pos.col + i), pos.row + i );
+            // moves.add( new Move( pos, to ) );
+            rightDown.addMove( new Move( pos, to ) );
         }
 
-        return moves;
+        paths.add( leftDown );
+        paths.add( leftUp );
+        paths.add( rightUp );
+        paths.add( rightDown );
+
+        return paths;
     }
     
-    public List< Move > getMoves( Cell pos ) {
+    public List< Path > getMoves( Cell pos ) {
         return Bishop.getPossibleMoves( pos );
     }
 
