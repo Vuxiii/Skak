@@ -19,6 +19,9 @@ class Board {
         board = new Piece[8][8];
         initPieces();
 
+
+        setPiece( new Cell( 'D', 5 ), new Pawn( "white" ) );
+        setPiece( new Cell( 'C', 4 ), new Pawn( "black" ) );
         
         //List< Move > moves = getLegalMoves();
         //printMoves( moves );
@@ -219,7 +222,8 @@ class Board {
                             currentMove.to.row - currentMove.from.row == ( piece.color().equals( "white" ) ? -1 : 1 ) ) {
                         p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
                     // Diagonal check
-                    } else if ( currentMove.to.col != currentMove.from.col && (target == null || !target.color().equals( piece.color() ) ) ) {
+                    } else if ( currentMove.to.col != currentMove.from.col && 
+                                (target == null || target.color().equals( piece.color() ) ) ) {
                         p.removeMove( currentMove );
                     }
                     currentMove = null;

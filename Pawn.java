@@ -4,6 +4,10 @@ import java.util.List;
 public class Pawn implements Piece {
     private final String color;
 
+    /**
+     * Constructs a new Pawn with the given color.
+     * @param color the color of this Piece.
+     */
     public Pawn( String color ) {
         this.color = color;
     }

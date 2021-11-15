@@ -1,5 +1,15 @@
 import java.util.Scanner;
 
+// Når man vælger sin brik at flytte, så marker de felter den kan flytte hen til med et X
+
+// Fejl ved bonde angreb.
+
+// Bonde move
+
+// Skak, skak mat
+
+// Castle
+
 public class Client {
     static Scanner in = new Scanner( System.in );
     static boolean whiteTurn = true;
@@ -24,10 +34,19 @@ public class Client {
         }
     }
 
+    /**
+     * This method returns the color of the current player.
+     * @return "black" if current player is black, otherwise "white"
+     */
     public static String currentPlayer() {
         return whiteTurn ? "white" : "black";
     }
 
+    /**
+     * This method asks the User where to move the selected Piece to.
+     * @param from the cell containing the selected Piece
+     * @return The target destination for this move.
+     */
     public static Cell getToCell( Cell from ) {
         Cell toCell = null;
         String cellColor = null;
@@ -38,13 +57,17 @@ public class Client {
                 else
                     System.out.println( "You can not move " + from + " to cell " + toCell );
                 
-            toCell = getCell( "Where do you want yo move " + from + " to?\n> " );
+            toCell = getCell( "Where do you want to move " + from + " to?\n> " );
             cellColor = board.color( toCell );
         } while( !(cellColor == null || !cellColor.equals( currentPlayer()) ) || !board.isLegalMove( from, toCell ) );
 
         return toCell;
     }
 
+    /**
+     * This method asks the User to select a Piece they want to move.
+     * @return the Cell containing the selected Piece.
+     */
     public static Cell getFromMove() {
         Cell fromCell = null;
         String cellColor = null;
@@ -63,6 +86,11 @@ public class Client {
         return fromCell;
     }
 
+    /**
+     * This method asks the user with the given msg and returns a correct Cell on the Board
+     * @param msg the message to display to the user.
+     * @return the Cell the user selected.
+     */
     public static Cell getCell( String msg ) {
         String fromCell = null;
         do {
@@ -75,6 +103,11 @@ public class Client {
         return new Cell( Character.toUpperCase(fromCell.charAt(0)), (int) (fromCell.charAt(1) - '0') );
     } 
 
+    /**
+     * This method checks whether the user inputted a correctly formatted cell.
+     * @param cell The given String to check for formatation.
+     * @return true if the String is formatted correctly.
+     */
     public static boolean isLegalInputFormat( String cell ) {
         if ( cell.length() != 2 )
             return false;

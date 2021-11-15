@@ -10,14 +10,23 @@ public class Cell {
         this.row = row;
     }
 
+    /**
+     * Returns a textual representation of this Cell.
+     */
     public String toString() {
         return "[" + col + "," + row + "]";
     }
 
+    /**
+     * Returns the hashCode for this instance.
+     */
     public int hashCode() {
         return col + row*31;
     }
 
+    /**
+     * Checks if other is equals to this instance.
+     */
     public boolean equals( Object other ) {
         if ( other == null )
             return false;

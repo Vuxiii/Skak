@@ -40,6 +40,11 @@ public class Path {
         }
     }
 
+    /**
+     * This method extracts all possible moves from the given list of Paths.
+     * @param paths the list of Paths to extract Moves from
+     * @return An ArrayList< Move > containing all of the possible moves that can be made.
+     */
     public static List< Move > extractMoves( List< Path > paths ) {
         List< Move > out = new ArrayList<>();
         for ( Path p : paths )
@@ -73,7 +78,7 @@ public class Path {
 
     /**
      * Returns the next Move in this Path after the given Move.
-     * @param from the Move from which to retrieve the next Move.
+     * @param from the Move from which to retrieve the next Move from.
      * @return the next Move in this Path.
      */
     public Move next( Move from ) {

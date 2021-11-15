@@ -4,6 +4,10 @@ import java.util.List;
 public class Knight implements Piece {
     private final String color;
 
+    /**
+     * Constructs a new Knight with the given color.
+     * @param color the color of this Piece.
+     */
     public Knight( String color ) {
         this.color = color;
     }

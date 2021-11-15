@@ -4,6 +4,10 @@ import java.util.List;
 public class Bishop implements Piece {
     private final String color;
 
+    /**
+     * Constructs a new Bishop with the given color.
+     * @param color the color of this Piece.
+     */
     public Bishop( String color ) {
         this.color = color;
     }

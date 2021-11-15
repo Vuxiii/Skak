@@ -4,6 +4,10 @@ import java.util.List;
 public class Rook implements Piece {
     private final String color;
 
+    /**
+     * Constructs a new Rook with the given color.
+     * @param color the color of this Piece.
+     */
     public Rook( String color ) {
         this.color = color;
     }

@@ -4,6 +4,10 @@ import java.util.List;
 public class Queen implements Piece {
     private final String color;
 
+    /**
+     * Constructs a new Queen with the given color.
+     * @param color the color of this Piece.
+     */
     public Queen( String color ) {
         this.color = color;
     }
