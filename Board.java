@@ -5,11 +5,13 @@ import java.util.List;
 
 class Board {
 
-    private String boardWhiteCell = "\u2B1C"; //2b1b
+    private String boardWhiteCell = "  "; //"\u2B1C"
 
     private Map< Character, Integer > charToInt; 
 
     private Piece[][] board;
+
+    private boolean dbg = false; // debug.
 
     public Board() {
         initCharToInt();
@@ -17,10 +19,14 @@ class Board {
         board = new Piece[8][8];
         initPieces();
 
-        setPiece( new Cell( 'D', 3 ), new Queen( "white" ) );
         
-        List< Move > moves = getLegalMoves();
-        printMoves( moves );
+        //List< Move > moves = getLegalMoves();
+        //printMoves( moves );
+    }
+
+    private void debug( String msg ) {
+        if (dbg)
+            System.out.print( msg );
     }
 
     public void printMoves( List< Move > moves ) {
@@ -162,6 +168,20 @@ class Board {
      * This method returns a List of legal moves that are possible based on the current Board.
      */
     public List< Move > getLegalMoves() {
+        
+        List< Path > possiblePaths = retrieveAllPaths();
+
+        removeIllegalMoves( possiblePaths );
+
+        return Path.extractMoves( possiblePaths );
+    }
+
+    /**
+     * This method computes all possible paths for each Piece on the Board.
+     * It does not do any sorting.
+     * @return a List with all possible path for each Piece on the Board.
+     */
+    private List< Path > retrieveAllPaths() {
         List< Path > possiblePaths = new ArrayList<>();
 
         for ( int row = 0; row < board.length; row++ ) {
@@ -173,33 +193,103 @@ class Board {
                 }
             }
         }
+        return possiblePaths;
+    }
 
+    /**
+     * This method removes all illegal Paths from the given List of Paths.
+     * This method modifies the given List.
+     */
+    private void removeIllegalMoves( List< Path > possiblePaths ) {
         // Check for same color && Pieces protected by another Piece.. Remove these.
         for ( Path p : possiblePaths ) {
             Move currentMove = p.head();
             Move prev = currentMove;
-            // System.out.println( "asd" );
+            
             while ( currentMove != null ) {
+                
                 Piece piece = getPiece( currentMove.from );
                 Piece target = getPiece( currentMove.to );
                 if ( target != null && target.color().equals( piece.color() ) ) { // It is a friendly piece.
                     p.removeMove( currentMove );
                     currentMove = p.next( prev );
+                } else if ( piece instanceof Pawn ) {
+                    // Check infront.
+                    if ( target != null && currentMove.to.col == currentMove.from.col && 
+                            currentMove.to.row - currentMove.from.row == ( piece.color().equals( "white" ) ? -1 : 1 ) ) {
+                        p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
+                    // Diagonal check
+                    } else if ( currentMove.to.col != currentMove.from.col && (target == null || !target.color().equals( piece.color() ) ) ) {
+                        p.removeMove( currentMove );
+                    }
+                    currentMove = null;
                 } else if ( target != null ) { // We know it is an enemy
-                    
                     Move next = p.next( currentMove );
-                    System.out.println( "Enemy " + getPiece( currentMove.to ) + " @ " + currentMove.to + " is a threat to " + getPiece( currentMove.from ) + " @ " + currentMove.from );
-                    if ( next != null ) 
-                        p.removeMove( next );     
+                    
+                    if ( next != null )                
+                        p.removeMove( next );
+                        
                     currentMove = null; // There can't possibly be any Moves behind this enemy, because the Piece blocks the Path.           
                 } else
-                    currentMove = p.next( currentMove );
+                    currentMove = p.next( currentMove ); 
                 prev = currentMove;
             }
         }
-        
+    }
 
-        return Path.extractMoves( possiblePaths );
+    /**
+     * Checks if the given Cell has any legal moves.
+     * @return true if the Piece in the given cell can perform a legal move. 
+     */
+    public boolean pieceCanBeMoved( Cell cell ) {
+        Piece piece = getPiece( cell );
+        if ( piece == null )
+            return false;
+
+        List< Path > paths = piece.getMoves( cell );
+        removeIllegalMoves( paths );
+        List< Move > moves = new ArrayList<>();
+        for ( Path p : paths )
+            moves.addAll( p.moves() );
+
+        // debug( cell + " has " + moves.size() + " moves!" );
+        return moves.size() > 0;
+    }
+
+    /**
+     * Checks if the given move is valid.
+     * Precondition: Cell from != null
+     */
+    public boolean isLegalMove( Cell from, Cell to ) {
+        Piece piece = getPiece( from );
+        List< Path > paths = piece.getMoves( from );
+        removeIllegalMoves( paths );
+
+        List< Move > moves = new ArrayList<>();
+        for ( Path p : paths )
+            moves.addAll( p.moves() );
+        
+        Move m = new Move( from, to );
+
+        for ( Move move : moves )
+            if ( move.equals( m ) ) {
+                //debug( "The move " + m + " is legal." );
+                return true;
+            }
+                
+
+        //debug( "The move " + m + " is not legal." );
+        return false;
+
+    }
+
+    /**
+     * This method returns the color of the Piece in the given Cell
+     * @return the color of the given Piece or null if the Cell is empty.
+     */
+    public String color( Cell cell ) {
+        Piece piece = getPiece( cell );
+        return piece == null ? null : piece.color();
     }
 
     /**
@@ -228,7 +318,7 @@ class Board {
             s += "|";
             for ( Piece p : row ) {
                 if ( p != null )
-                    s += " " + p.toString();
+                    s += "" + p.toString() + " ";
                 else
                     s += c % 2 == 0 ? boardWhiteCell : "  ";
                 s += "|";

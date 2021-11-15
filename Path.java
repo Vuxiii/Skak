@@ -90,8 +90,8 @@ public class Path {
      * @param move the move which needs to be removed.
      */
     public void removeMove( Move move ) {
-        System.out.println( "Move to delete: " + move );
-        System.out.println( toString() );
+        //System.out.println( "Move to delete: " + move );
+        //System.out.println( toString() );
         Node current = begin;
         Node prev = begin;
         while( current != null ) {
@@ -102,7 +102,7 @@ public class Path {
             prev = current;
             current = current.next;
         }
-        System.out.println( toString() );
+        //System.out.println( toString() );
         
     }
 
