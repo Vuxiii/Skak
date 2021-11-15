@@ -105,6 +105,6 @@ public class Knight implements Piece {
     }
     
     public String toString() {
-        return color == "black" ? "♞" : "♘";
+        return !color.equals( "black" ) ? "♞" : "♘";
     }
 }

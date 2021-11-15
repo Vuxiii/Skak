@@ -12,12 +12,18 @@ public class Pawn implements Piece {
         this.color = color;
     }
 
+    public boolean hasMoved( Cell currentPosition ) {
+        return color.equals( "black" ) 
+            ? ( currentPosition.row != 2 )
+            : ( currentPosition.row != 7 );
+    }
+
     public String color() {
         return color;
     }
 
     public String toString() {
-        return color == "black" ? "♟" : "♙";
+        return !color.equals( "black" ) ? "♟" : "♙";
     }
     
     public static List< Path > getPossibleMoves( Cell pos, String color ) {

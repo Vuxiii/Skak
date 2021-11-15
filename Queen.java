@@ -30,6 +30,6 @@ public class Queen implements Piece {
     }
 
     public String toString() {
-        return color == "black" ? "♛" : "♕";
+        return !color.equals( "black" ) ? "♛" : "♕";
     }
 }

@@ -58,6 +58,6 @@ public class Rook implements Piece {
     }
 
     public String toString() {
-        return color == "black" ? "♜" : "♖";
+        return !color.equals( "black" ) ? "♜" : "♖";
     }
 }

@@ -18,15 +18,22 @@ public class Client {
 
     static Board board;
 
+    static boolean displayHelperMarkers = true;
+
     public static void main( String[] args ) {
 
         board = new Board();
 
         while( runGame ) {
+            
             System.out.println( board );
             System.out.println( "It is " + (whiteTurn ? "White" : "Black") + " player's turn!" );
             
             Cell fromCell = getFromMove();
+            if ( displayHelperMarkers ) {
+                board.helperMarkers( fromCell );
+                System.out.println( board );
+            }
             Cell toCell = getToCell( fromCell );
             Move move = new Move( fromCell, toCell );
             board.move( move );

@@ -63,6 +63,6 @@ public class Bishop implements Piece {
     }
 
     public String toString() {
-        return color == "black" ? "♝" : "♗";
+        return !color.equals( "black" ) ? "♝" : "♗";
     }
 }

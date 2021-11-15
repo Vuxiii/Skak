@@ -1,11 +1,14 @@
 import java.util.Map;
+import java.util.Set;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 
 class Board {
 
     private String boardWhiteCell = "  "; //"\u2B1C"
+    private String helperMarker = "\u2B1C";
 
     private Map< Character, Integer > charToInt; 
 
@@ -13,7 +16,10 @@ class Board {
 
     private boolean dbg = false; // debug.
 
+    private Set< Cell > markers;
+
     public Board() {
+        
         initCharToInt();
         
         board = new Piece[8][8];
@@ -22,6 +28,8 @@ class Board {
 
         setPiece( new Cell( 'D', 5 ), new Pawn( "white" ) );
         setPiece( new Cell( 'C', 4 ), new Pawn( "black" ) );
+        
+        markers = new HashSet< Cell >();
         
         //List< Move > moves = getLegalMoves();
         //printMoves( moves );
@@ -32,6 +40,10 @@ class Board {
             System.out.print( msg );
     }
 
+    /**
+     * This method prints all of the Moves from the given list
+     * @param moves the List of moves to be printed.
+     */
     public void printMoves( List< Move > moves ) {
         for ( Move m : moves )
             System.out.println( m );
@@ -217,16 +229,25 @@ class Board {
                     p.removeMove( currentMove );
                     currentMove = p.next( prev );
                 } else if ( piece instanceof Pawn ) {
+                    Pawn pawn = (Pawn) piece;
+                    debug( pawn.hasMoved( currentMove.from ) + "\n" );
                     // Check infront.
+                    debug( p.toString() + "\n" );
+                    debug( currentMove + " -> " + (currentMove.to.row - currentMove.from.row) + "\n" );
                     if ( target != null && currentMove.to.col == currentMove.from.col && 
-                            currentMove.to.row - currentMove.from.row == ( piece.color().equals( "white" ) ? -1 : 1 ) ) {
+                            currentMove.to.row - currentMove.from.row == ( pawn.color().equals( "white" ) ? -1 : 1 ) ) {
                         p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
+                    // Move two forward.
+                    } else if ( pawn.hasMoved( currentMove.from ) && 
+                                currentMove.to.row - currentMove.from.row == (pawn.color().equals( "white" ) ? -2 : 2 ) ) {
+                        debug( "asdasdasd\n" );
+                        p.removeMove( currentMove );
                     // Diagonal check
                     } else if ( currentMove.to.col != currentMove.from.col && 
-                                (target == null || target.color().equals( piece.color() ) ) ) {
+                                (target == null || target.color().equals( pawn.color() ) ) ) {
                         p.removeMove( currentMove );
                     }
-                    currentMove = null;
+                    currentMove = p.next( currentMove );
                 } else if ( target != null ) { // We know it is an enemy
                     Move next = p.next( currentMove );
                     
@@ -242,6 +263,24 @@ class Board {
     }
 
     /**
+     * Returns a List of legal moves for the Piece contained in the given Cell
+     * Precondition: The cell contains a Piece.
+     * @param cell the Cell containing the Piece
+     * @return a List of moves the Piece located at the given Cell can make.
+     */
+    private List< Move > getLegalMoves( Cell cell ) {
+        
+        Piece piece = getPiece( cell );
+        List< Path > paths = piece.getMoves( cell );
+        removeIllegalMoves( paths );
+        List< Move > moves = new ArrayList<>();
+        for ( Path p : paths )
+            moves.addAll( p.moves() );
+
+        return moves;
+    }
+
+    /**
      * Checks if the given Cell has any legal moves.
      * @return true if the Piece in the given cell can perform a legal move. 
      */
@@ -249,15 +288,8 @@ class Board {
         Piece piece = getPiece( cell );
         if ( piece == null )
             return false;
-
-        List< Path > paths = piece.getMoves( cell );
-        removeIllegalMoves( paths );
-        List< Move > moves = new ArrayList<>();
-        for ( Path p : paths )
-            moves.addAll( p.moves() );
-
         // debug( cell + " has " + moves.size() + " moves!" );
-        return moves.size() > 0;
+        return getLegalMoves( cell ).size() > 0;
     }
 
     /**
@@ -265,26 +297,28 @@ class Board {
      * Precondition: Cell from != null
      */
     public boolean isLegalMove( Cell from, Cell to ) {
-        Piece piece = getPiece( from );
-        List< Path > paths = piece.getMoves( from );
-        removeIllegalMoves( paths );
-
-        List< Move > moves = new ArrayList<>();
-        for ( Path p : paths )
-            moves.addAll( p.moves() );
+        List< Move > moves = getLegalMoves( from );
         
         Move m = new Move( from, to );
 
         for ( Move move : moves )
-            if ( move.equals( m ) ) {
-                //debug( "The move " + m + " is legal." );
+            if ( move.equals( m ) )
                 return true;
-            }
-                
 
-        //debug( "The move " + m + " is not legal." );
         return false;
 
+    }
+
+    /**
+     * This method puts Xs on the board where it is possible to move the selected Piece.
+     * Precondition: The Cell contains a Piece.
+     * @param cell the Cell containing the Selected Piece
+     */
+    public void helperMarkers( Cell cell ) {
+        List< Move > moves = getLegalMoves( cell );
+
+        for ( Move move : moves )
+            markers.add( move.to );
     }
 
     /**
@@ -317,22 +351,31 @@ class Board {
 
         int downCounter = 1;
 
+        char currentCol = 'A';
+        int currentRow = 1;
+
         for ( Piece[] row : board ) {
             s += "+--+--+--+--+--+--+--+--+\n";
             s += "|";
             for ( Piece p : row ) {
+                Cell currentCell = new Cell( currentCol, currentRow );
+                currentCol = ( currentCol == 'H' ? 'A' : (char) (currentCol + 1) );
                 if ( p != null )
                     s += "" + p.toString() + " ";
+                else if ( markers.contains( currentCell ) )
+                    s += helperMarker;
                 else
                     s += c % 2 == 0 ? boardWhiteCell : "  ";
                 s += "|";
                 c++;
             }
+            currentRow++;
             c++;
             s += " " + downCounter++ + "\n";
         }
         s += "+--+--+--+--+--+--+--+--+\n";
         s += "  A  B  C  D  E  F  G  H\n";
+        markers.clear(); // Clear the helper markers.
         return s;
     }
 
