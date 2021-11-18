@@ -108,7 +108,7 @@ class Board {
      */
     private void initPawns( String color ) {
         for ( char i = 'A'; i <= 'H'; i++ )
-            setPiece( new Cell( i, color.equals( "black" ) ? 2 : 7 ), new Pawn( color ) );
+            setPiece( new Cell( i, color.equals( "black" ) ? 2 : 7 ), new Pawn( color, new Cell( i, color.equals( "black" ) ? 2 : 7 ) ) );
     }
     
     /**
@@ -225,24 +225,7 @@ class Board {
                     p.removeMove( currentMove );
                     currentMove = p.next( prev );
                 } else if ( piece instanceof Pawn ) {
-                    Pawn pawn = (Pawn) piece;
-                    debug( pawn.hasMoved( currentMove.from ) + "\n" );
-                    // Check infront.
-                    debug( p.toString() + "\n" );
-                    debug( currentMove + " -> " + (currentMove.to.row - currentMove.from.row) + "\n" );
-                    if ( target != null && currentMove.to.col == currentMove.from.col && 
-                            currentMove.to.row - currentMove.from.row == ( pawn.color().equals( "white" ) ? -1 : 1 ) ) {
-                        p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
-                    // Move two forward.
-                    } else if ( pawn.hasMoved( currentMove.from ) && 
-                                currentMove.to.row - currentMove.from.row == (pawn.color().equals( "white" ) ? -2 : 2 ) ) {
-                        debug( "asdasdasd\n" );
-                        p.removeMove( currentMove );
-                    // Diagonal check
-                    } else if ( currentMove.to.col != currentMove.from.col && 
-                                (target == null || target.color().equals( pawn.color() ) ) ) {
-                        p.removeMove( currentMove );
-                    }
+                    removeIllegalMovesForPawn( piece, target, currentMove, p );
                     currentMove = p.next( currentMove );
                 } else if ( target != null ) { // We know it is an enemy
                     Move next = p.next( currentMove );
@@ -256,6 +239,35 @@ class Board {
                 prev = currentMove;
             }
         }
+    }
+
+    /**
+     * This method removes illegal moves for Pawns.
+     * @param piece The piece that is making the move.
+     * @param target The piece at the target Cell. Might be null if Cell is empty.
+     * @param currentMove the current Move to check.
+     * @param p the Path that this Move originates from.
+     */
+    private void removeIllegalMovesForPawn( Piece piece, Piece target, Move currentMove, Path p ) {
+        Pawn pawn = (Pawn) piece;
+                    
+        // Check infront.
+        if ( target != null && currentMove.to.col == currentMove.from.col && Math.abs( currentMove.to.row - currentMove.from.row ) == 1 ) {
+            p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
+        // Move two forward.
+        } else if ( pawn.hasMoved() && Math.abs( currentMove.to.row - currentMove.from.row ) == 2 ) {
+            p.removeMove( currentMove );
+        // Diagonal check
+        } else if ( currentMove.to.col != currentMove.from.col && (target == null || target.color().equals( pawn.color() ) ) ) {
+            // Check if we can make the kill where the opponent pawn moves two cells.
+            Cell side = new Cell( currentMove.to.col, currentMove.from.row );
+            if ( getPiece( side ) instanceof Pawn ) {
+                Pawn sidePawn = (Pawn) getPiece( side );
+                if ( !(sidePawn.totalMoves() == 1 && sidePawn.hasMoved() ) ) 
+                    p.removeMove( currentMove );
+            } else 
+                p.removeMove( currentMove );
+        }        
     }
 
     /**
@@ -291,6 +303,9 @@ class Board {
     /**
      * Checks if the given move is valid.
      * Precondition: Cell from != null
+     * @param from The Cell which contains the Piece that wants to move
+     * @param to The Cell where the Piece wants to move to.
+     * @return Whether or not the given move is legal
      */
     public boolean isLegalMove( Cell from, Cell to ) {
         List< Move > moves = getLegalMoves( from );
@@ -319,6 +334,7 @@ class Board {
 
     /**
      * This method returns the color of the Piece in the given Cell
+     * @param cell The Cell containing the Piece
      * @return the color of the given Piece or null if the Cell is empty.
      */
     public String color( Cell cell ) {
@@ -329,13 +345,37 @@ class Board {
     /**
      * Moves the piece given at the location move.from to the location move.to
      * Precondition: The move is valid.
+     * @param move The Move that is to be made.
      */
     public void move( Move move ) {
         Cell from = move.from;
         Cell to = move.to;
-
-        setPiece( to, getPiece( from ) );
+        Piece fromPiece = getPiece( from ); 
+        setPiece( to, fromPiece );
         setPiece( from, null );
+
+        if ( fromPiece instanceof Pawn ) {
+            handleEnPassant( fromPiece, move );
+        }
+    }
+
+    /**
+     * This method handles the En Passant move.
+     * @param fromPiece The (Pawn) that is making the move
+     * @param move The Move that is being made.
+     */
+    private void handleEnPassant( Piece fromPiece, Move move ) {
+        Pawn fp = (Pawn) fromPiece;
+        fp.plusMove();
+        fp.updateLastPos( move.from );
+        if ( move.from.col != move.to.col ) { // Attack
+            Cell side = new Cell( move.to.col, move.from.row );
+            if ( getPiece( side ) instanceof Pawn ) {
+                Pawn sidePawn = (Pawn) getPiece( side );
+                if ( sidePawn.lastPost().equals( new Cell( move.to.col, sidePawn.color().equals( "white" ) ? 7 : 2 ) ) && sidePawn.totalMoves() == 1 )
+                    setPiece( side, null ); // remove that piece.                    
+            }
+        } 
     }
 
     /**

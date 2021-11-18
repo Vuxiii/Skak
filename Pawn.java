@@ -3,19 +3,56 @@ import java.util.List;
 
 public class Pawn implements Piece {
     private final String color;
+    private int totalMoves = 0;
+
+    private Cell lastPos;
 
     /**
      * Constructs a new Pawn with the given color.
      * @param color the color of this Piece.
      */
-    public Pawn( String color ) {
+    public Pawn( String color, Cell cell ) {
         this.color = color;
+        lastPos = cell;
     }
 
-    public boolean hasMoved( Cell currentPosition ) {
-        return color.equals( "black" ) 
-            ? ( currentPosition.row != 2 )
-            : ( currentPosition.row != 7 );
+    /**
+     * Returns the last Cell this Pawn was located at.
+     */
+    public Cell lastPost() {
+        return lastPos;
+    }
+
+    /**
+     * This method updates this Pawn's last position. Used for En Passante Move.
+     * Precondition: The given cell is the last move this Pawn made.
+     * @param cell The Cell where this Pawn was last located.
+     */
+    public void updateLastPos( Cell cell ) {
+        lastPos = cell;
+    }
+
+    /**
+     * Increments how many times this Pawn has moves. Used for En Passante Move.
+     */
+    public void plusMove() {
+        totalMoves++;
+    }
+
+    /**
+     * Returns the total moves this Pawn has made. Used for En Passante Move.
+     */
+    public int totalMoves() {
+        return totalMoves;
+    }
+
+    /**
+     * Checks if this Pawn has made a move yet.
+     * @param currentPosition the current Cell of this Pawn
+     * @return Whether this Pawn has made any moves.
+     */
+    public boolean hasMoved() {
+        return totalMoves > 0;
     }
 
     public String color() {
