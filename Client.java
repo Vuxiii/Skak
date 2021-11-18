@@ -1,9 +1,5 @@
 import java.util.Scanner;
 
-// Når man vælger sin brik at flytte, så marker de felter den kan flytte hen til med et X
-
-// Fejl ved bonde angreb.
-
 // Bonde move
 
 // Skak, skak mat

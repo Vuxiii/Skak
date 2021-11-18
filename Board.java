@@ -25,10 +25,6 @@ class Board {
         board = new Piece[8][8];
         initPieces();
 
-
-        setPiece( new Cell( 'D', 5 ), new Pawn( "white" ) );
-        setPiece( new Cell( 'C', 4 ), new Pawn( "black" ) );
-        
         markers = new HashSet< Cell >();
         
         //List< Move > moves = getLegalMoves();
