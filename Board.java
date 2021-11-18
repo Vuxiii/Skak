@@ -219,13 +219,13 @@ class Board {
             
             while ( currentMove != null ) {
                 
-                Piece piece = getPiece( currentMove.from );
+                Piece from = getPiece( currentMove.from );
                 Piece target = getPiece( currentMove.to );
-                if ( target != null && target.color().equals( piece.color() ) ) { // It is a friendly piece.
+                if ( target != null && target.color().equals( from.color() ) ) { // It is a friendly piece.
                     p.removeMove( currentMove );
                     currentMove = p.next( prev );
-                } else if ( piece instanceof Pawn ) {
-                    removeIllegalMovesForPawn( piece, target, currentMove, p );
+                } else if ( from instanceof Pawn ) {
+                    removeIllegalMovesForPawn( from, target, currentMove, p );
                     currentMove = p.next( currentMove );
                 } else if ( target != null ) { // We know it is an enemy
                     Move next = p.next( currentMove );
@@ -243,13 +243,13 @@ class Board {
 
     /**
      * This method removes illegal moves for Pawns.
-     * @param piece The piece that is making the move.
+     * @param from The piece that is making the move.
      * @param target The piece at the target Cell. Might be null if Cell is empty.
      * @param currentMove the current Move to check.
      * @param p the Path that this Move originates from.
      */
-    private void removeIllegalMovesForPawn( Piece piece, Piece target, Move currentMove, Path p ) {
-        Pawn pawn = (Pawn) piece;
+    private void removeIllegalMovesForPawn( Piece from, Piece target, Move currentMove, Path p ) {
+        Pawn pawn = (Pawn) from;
                     
         // Check infront.
         if ( target != null && currentMove.to.col == currentMove.from.col && Math.abs( currentMove.to.row - currentMove.from.row ) == 1 ) {
