@@ -3,6 +3,7 @@ import java.util.List;
 
 public class Rook implements Piece {
     private final String color;
+    private int totalMoves = 0;
 
     /**
      * Constructs a new Rook with the given color.
@@ -12,8 +13,19 @@ public class Rook implements Piece {
         this.color = color;
     }
 
-    public String color() {
-        return color;
+    /**
+     * This method increments the counter that tracks how many times this King has moved. Used for Castleing.
+     */
+    public void plusMove() {
+        totalMoves++;
+    }
+
+    /**
+     * This method checks whether this King has moved. Used for Castleing.
+     * @return true if this King has moved.
+     */
+    public boolean hasMoved() {
+        return totalMoves > 0;
     }
     
     public static List< Path > getPossibleMoves( Cell pos ) {
@@ -55,6 +67,18 @@ public class Rook implements Piece {
     
     public List< Path > getMoves( Cell pos ) {
         return Rook.getPossibleMoves( pos );
+    }
+
+
+
+    public String color() {
+        return color;
+    }
+
+    public Piece copy() {
+        Rook rook = new Rook( color );
+        rook.totalMoves = totalMoves;
+        return rook;
     }
 
     public String toString() {

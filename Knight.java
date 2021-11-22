@@ -104,6 +104,11 @@ public class Knight implements Piece {
         return Knight.getPossibleMoves( pos );
     }
     
+    public Piece copy() {
+        Knight knight = new Knight( color );
+        return knight;
+    }
+
     public String toString() {
         return !color.equals( "black" ) ? "♞" : "♘";
     }

@@ -12,6 +12,7 @@ class Board {
 
     private Map< Character, Integer > charToInt; 
 
+    private Piece[][] prev;
     private Piece[][] board;
 
     private boolean dbg = false; // debug.
@@ -227,6 +228,12 @@ class Board {
                 } else if ( from instanceof Pawn ) {
                     removeIllegalMovesForPawn( from, target, currentMove, p );
                     currentMove = p.next( currentMove );
+                } else if ( from instanceof Rook ) {
+                    Rook rook = (Rook) from;
+                    if ( rook.hasMoved() ) {
+
+                    }
+                    currentMove = p.next( currentMove );
                 } else if ( target != null ) { // We know it is an enemy
                     Move next = p.next( currentMove );
                     
@@ -263,7 +270,7 @@ class Board {
             Cell side = new Cell( currentMove.to.col, currentMove.from.row );
             if ( getPiece( side ) instanceof Pawn ) {
                 Pawn sidePawn = (Pawn) getPiece( side );
-                if ( !(sidePawn.totalMoves() == 1 && sidePawn.hasMoved() ) ) 
+                if ( !( sidePawn.totalMoves() == 1 && sidePawn.hasMoved() && currentMove.from.row == ( pawn.color().equals( "black" ) ? 5 : 4) ) ) 
                     p.removeMove( currentMove );
             } else 
                 p.removeMove( currentMove );
@@ -348,24 +355,53 @@ class Board {
      * @param move The Move that is to be made.
      */
     public void move( Move move ) {
+        prev = copy().board;
         Cell from = move.from;
         Cell to = move.to;
         Piece fromPiece = getPiece( from ); 
+        
+        if ( fromPiece instanceof Pawn ) {
+            Pawn fp = (Pawn) fromPiece;
+            handleEnPassant( fp, move );
+            fp.plusMove();
+        } else if ( fromPiece instanceof Rook ) {
+            Rook fp = (Rook) fromPiece;
+            handleCastle( fp, move );
+            fp.plusMove();
+        } else if ( fromPiece instanceof King ) {
+            King fp = (King) fromPiece;
+            fp.plusMove();
+        }
+
         setPiece( to, fromPiece );
         setPiece( from, null );
+    }
 
-        if ( fromPiece instanceof Pawn ) {
-            handleEnPassant( fromPiece, move );
+    private void handleCastle( Rook rook, Move move ) {
+        Piece target = getPiece( move.to );
+        char startCol = (rook.color().equals( "black" ) ? 'A' : 'H');
+        if ( !rook.hasMoved() && move.from.col == startCol && target != null && target.color().equals( rook.color() ) ) {
+            if ( target instanceof King ) {
+                King king = (King) target;
+                if ( !king.hasMoved() ) {
+                    // Perform castleing.
+                    setPiece( new Cell( startCol == 'A' ? 'C' : 'G', move.to.row ), king );
+                    setPiece( new Cell( startCol == 'A' ? 'D' : 'F', move.to.row ), rook );
+
+                    setPiece( move.to, null ); 
+                    setPiece( move.from, null ); // This will actually happen from caller.
+
+                }
+            }
         }
     }
 
     /**
      * This method handles the En Passant move.
-     * @param fromPiece The (Pawn) that is making the move
+     * @param fp The Pawn that is making the move
      * @param move The Move that is being made.
      */
-    private void handleEnPassant( Piece fromPiece, Move move ) {
-        Pawn fp = (Pawn) fromPiece;
+    private void handleEnPassant( Pawn fp, Move move ) {
         fp.plusMove();
         fp.updateLastPos( move.from );
         if ( move.from.col != move.to.col ) { // Attack
@@ -376,6 +412,19 @@ class Board {
                     setPiece( side, null ); // remove that piece.                    
             }
         } 
+    }
+
+    /**
+     * This method returns a copy of this Board.
+     * @return a copy of this Board.
+     */
+    public Board copy() {
+        Board b = new Board();
+        for ( int i = 0; i < board[0].length; i++ ) {
+            for ( int j = 0; j < board.length; j++ )
+                b.board[i][j] = board[i][j].copy();
+        }
+        return b;
     }
 
     /**

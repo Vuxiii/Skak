@@ -33,7 +33,7 @@ public class Pawn implements Piece {
     }
 
     /**
-     * Increments how many times this Pawn has moves. Used for En Passante Move.
+     * Increments how many times this Pawn has moved. Used for En Passante Move.
      */
     public void plusMove() {
         totalMoves++;
@@ -104,6 +104,12 @@ public class Pawn implements Piece {
         return paths;
     }
     
+    public Piece copy() {
+        Pawn pawn = new Pawn( color, lastPos );
+        pawn.totalMoves = totalMoves;
+        return pawn;
+    }
+
     public List< Path > getMoves( Cell pos ) {
         return Pawn.getPossibleMoves( pos, color );
     }

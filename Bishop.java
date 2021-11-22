@@ -58,6 +58,11 @@ public class Bishop implements Piece {
         return paths;
     }
     
+    public Piece copy() {
+        Bishop bishop = new Bishop( color );
+        return bishop;
+    }
+
     public List< Path > getMoves( Cell pos ) {
         return Bishop.getPossibleMoves( pos );
     }

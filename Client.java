@@ -1,10 +1,12 @@
 import java.util.Scanner;
 
-// Bonde move
+// Added enum MoveType. Add these so it will be easier later.... Hard work naw ;(
 
 // Skak, skak mat
 
 // Castle
+
+// End game
 
 public class Client {
     static Scanner in = new Scanner( System.in );

@@ -29,6 +29,11 @@ public class Queen implements Piece {
         return Queen.getPossibleMoves( pos );
     }
 
+    public Piece copy() {
+        Queen queen = new Queen( color );
+        return queen;
+    }
+
     public String toString() {
         return !color.equals( "black" ) ? "♛" : "♕";
     }

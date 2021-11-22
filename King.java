@@ -4,12 +4,29 @@ import java.util.List;
 public class King implements Piece {
     private final String color;
 
+    private int totalMoves = 0;
+
     /**
      * Constructs a new King with the given color.
      * @param color the color of this Piece.
      */
     public King( String color ) {
         this.color = color;
+    }
+
+    /**
+     * This method increments the counter that tracks how many times this King has moved. Used for Castleing.
+     */
+    public void plusMove() {
+        totalMoves++;
+    }
+
+    /**
+     * This method checks whether this King has moved. Used for Castleing.
+     * @return true if this King has moved.
+     */
+    public boolean hasMoved() {
+        return totalMoves > 0;
     }
 
     public String color() {
@@ -55,6 +72,12 @@ public class King implements Piece {
     
     public List< Path > getMoves( Cell pos ) {
         return King.getPossibleMoves( pos );
+    }
+
+    public Piece copy() {
+        King king = new King( color );
+        king.totalMoves = totalMoves;
+        return king;
     }
 
     public String toString() {
