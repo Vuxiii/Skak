@@ -3,11 +3,8 @@ import java.util.List;
 
 public class Path {
     private class Node {
-
         Move move;
-
         Node next;
-
     }
 
     private Node begin;
@@ -108,7 +105,26 @@ public class Path {
             current = current.next;
         }
         //System.out.println( toString() );
-        
+    }
+
+    /**
+     * This method updates the given Move's MoveType to the given moveType
+     * Precondition: The Move is in this Path.
+     * @param move The Move to alter.
+     * @param moveType The new MoveType.
+     */
+    public void changeMoveType( Move move, MoveType moveType ) {
+        Node current = begin;
+        Node prev = begin;
+        while( !current.move.equals( move ) ) {
+            prev = current;
+            current = current.next;
+        }
+        Node newNode = new Node();
+        newNode.move = new Move( move.from, move.to, moveType ); 
+        prev.next = newNode;
+        newNode.next = current.next;
+        current = null;
     }
 
     /**

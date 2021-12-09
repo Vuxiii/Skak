@@ -2,37 +2,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class King implements Piece {
-    private final String color;
+    private final PieceColor color;
 
-    private int totalMoves = 0;
+    private int lastMoved = 0;
 
     /**
      * Constructs a new King with the given color.
      * @param color the color of this Piece.
      */
-    public King( String color ) {
+    public King( PieceColor color ) {
         this.color = color;
     }
 
-    /**
-     * This method increments the counter that tracks how many times this King has moved. Used for Castleing.
-     */
-    public void plusMove() {
-        totalMoves++;
-    }
-
-    /**
-     * This method checks whether this King has moved. Used for Castleing.
-     * @return true if this King has moved.
-     */
-    public boolean hasMoved() {
-        return totalMoves > 0;
-    }
-
-    public String color() {
+    public PieceColor color() {
         return color;
     }
-    
     public static List< Path > getPossibleMoves( Cell pos ) {
         // List< Move > moves = new ArrayList<>();
 
@@ -76,11 +60,20 @@ public class King implements Piece {
 
     public Piece copy() {
         King king = new King( color );
-        king.totalMoves = totalMoves;
         return king;
     }
 
     public String toString() {
-        return !color.equals( "black" ) ? "♚" : "♔";
+        return color != PieceColor.BLACK ? "♚" : "♔";
+    }
+
+    @Override
+    public void lastUsed(int tick) {
+        lastMoved = tick;
+    }
+
+    @Override
+    public int lastUsed() {
+        return lastMoved;
     }
 }

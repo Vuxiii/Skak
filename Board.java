@@ -7,17 +7,17 @@ import java.util.List;
 
 class Board {
 
-    private String boardWhiteCell = "  "; //"\u2B1C"
-    private String helperMarker = "\u2B1C";
+    
 
     private Map< Character, Integer > charToInt; 
 
-    private Piece[][] prev;
     private Piece[][] board;
 
     private boolean dbg = false; // debug.
 
     private Set< Cell > markers;
+
+    private int totalMoves = 0; // Used for en pessant.
 
     public Board() {
         
@@ -81,7 +81,7 @@ class Board {
      * This method places all of the black pieces.
      */
     private void initBlackPieces() {
-        String col = "black";
+        PieceColor col = PieceColor.BLACK;
         initPawns( col );
         initBishops( col );
         initKnights( col );
@@ -94,7 +94,7 @@ class Board {
      * This method places all of the white pieces.
      */
     private void initWhitePieces() {
-        String col = "white";
+        PieceColor col = PieceColor.WHITE;
         initPawns( col );
         initBishops( col );
         initKnights( col );
@@ -107,52 +107,52 @@ class Board {
      * This method simply places the pawns on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initPawns( String color ) {
+    private void initPawns( PieceColor color ) {
         for ( char i = 'A'; i <= 'H'; i++ )
-            setPiece( new Cell( i, color.equals( "black" ) ? 2 : 7 ), new Pawn( color, new Cell( i, color.equals( "black" ) ? 2 : 7 ) ) );
+            setPiece( new Cell( i, color == PieceColor.BLACK ? 2 : 7 ), new Pawn( color, new Cell( i, color == PieceColor.BLACK ? 2 : 7 ) ) );
     }
     
     /**
      * This method simply places the bishops on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initBishops( String color ) {
-        setPiece( new Cell( 'C', color.equals( "black" ) ? 1 : 8 ), new Bishop( color ) );
-        setPiece( new Cell( 'F', color.equals( "black" ) ? 1 : 8 ), new Bishop( color ) );
+    private void initBishops( PieceColor color ) {
+        setPiece( new Cell( 'C', color == PieceColor.BLACK ? 1 : 8 ), new Bishop( color ) );
+        setPiece( new Cell( 'F', color == PieceColor.BLACK ? 1 : 8 ), new Bishop( color ) );
     }
     
     /**
      * This method simply places the knights on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initKnights( String color ) {
-        setPiece( new Cell( 'B', color.equals( "black" ) ? 1 : 8 ), new Knight( color ) );
-        setPiece( new Cell( 'G', color.equals( "black" ) ? 1 : 8 ), new Knight( color ) );
+    private void initKnights( PieceColor color ) {
+        setPiece( new Cell( 'B', color == PieceColor.BLACK ? 1 : 8 ), new Knight( color ) );
+        setPiece( new Cell( 'G', color == PieceColor.BLACK ? 1 : 8 ), new Knight( color ) );
     }
     
     /**
      * This method simply places the rooks on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initRooks( String color ) {
-        setPiece( new Cell( 'A', color.equals( "black" ) ? 1 : 8), new Rook( color ) );
-        setPiece( new Cell( 'H', color.equals( "black" ) ? 1 : 8), new Rook( color ) );
+    private void initRooks( PieceColor color ) {
+        setPiece( new Cell( 'A', color == PieceColor.BLACK ? 1 : 8), new Rook( color ) );
+        setPiece( new Cell( 'H', color == PieceColor.BLACK ? 1 : 8), new Rook( color ) );
     }
 
     /**
      * This method simply places the queens on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initQueen( String color ) {
-        setPiece( new Cell( 'D', color.equals( "black" ) ? 1 : 8 ), new Queen( color ) );
+    private void initQueen( PieceColor color ) {
+        setPiece( new Cell( 'D', color == PieceColor.BLACK ? 1 : 8 ), new Queen( color ) );
     }
 
     /**
      * This method simply places the kings on the board at the correct position.
      * @param color indicates what color this piece is.
      */
-    private void initKing( String color ) {
-        setPiece( new Cell( 'E', color.equals( "black" ) ? 1 : 8 ), new King( color ) );
+    private void initKing( PieceColor color ) {
+        setPiece( new Cell( 'E', color == PieceColor.BLACK ? 1 : 8 ), new King( color ) );
     }
 
     /**
@@ -222,17 +222,19 @@ class Board {
                 
                 Piece from = getPiece( currentMove.from );
                 Piece target = getPiece( currentMove.to );
-                if ( target != null && target.color().equals( from.color() ) ) { // It is a friendly piece.
-                    p.removeMove( currentMove );
+                if ( target != null && target.color() == from.color() ) { // It is a friendly piece.
+                    if ( from instanceof Rook ) {
+                        Rook rook = (Rook) from;
+                        if ( rook.lastUsed() == 0 && target instanceof King && target.lastUsed() == 0 ){
+                            p.changeMoveType( currentMove, MoveType.CASTLEING );
+                            p.removeMove( p.next( currentMove ) );
+                        } else 
+                            p.removeMove( currentMove );
+                    } else
+                        p.removeMove( currentMove );
                     currentMove = p.next( prev );
                 } else if ( from instanceof Pawn ) {
                     removeIllegalMovesForPawn( from, target, currentMove, p );
-                    currentMove = p.next( currentMove );
-                } else if ( from instanceof Rook ) {
-                    Rook rook = (Rook) from;
-                    if ( rook.hasMoved() ) {
-
-                    }
                     currentMove = p.next( currentMove );
                 } else if ( target != null ) { // We know it is an enemy
                     Move next = p.next( currentMove );
@@ -257,20 +259,21 @@ class Board {
      */
     private void removeIllegalMovesForPawn( Piece from, Piece target, Move currentMove, Path p ) {
         Pawn pawn = (Pawn) from;
-                    
+        System.out.println( pawn.lastUsed() );
         // Check infront.
         if ( target != null && currentMove.to.col == currentMove.from.col && Math.abs( currentMove.to.row - currentMove.from.row ) == 1 ) {
             p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
         // Move two forward.
-        } else if ( pawn.hasMoved() && Math.abs( currentMove.to.row - currentMove.from.row ) == 2 ) {
+        } else if ( pawn.lastUsed() != 0 && Math.abs( currentMove.to.row - currentMove.from.row ) == 2 ) {
             p.removeMove( currentMove );
         // Diagonal check
-        } else if ( currentMove.to.col != currentMove.from.col && (target == null || target.color().equals( pawn.color() ) ) ) {
+        } else if ( currentMove.moveType == MoveType.ENPASSANT && (target == null || target.color() == pawn.color() ) ) {
+            // System.out.println( "Remove enpassant\t" + currentMove.toString() );
             // Check if we can make the kill where the opponent pawn moves two cells.
             Cell side = new Cell( currentMove.to.col, currentMove.from.row );
             if ( getPiece( side ) instanceof Pawn ) {
                 Pawn sidePawn = (Pawn) getPiece( side );
-                if ( !( sidePawn.totalMoves() == 1 && sidePawn.hasMoved() && currentMove.from.row == ( pawn.color().equals( "black" ) ? 5 : 4) ) ) 
+                if ( !( sidePawn.lastUsed() == totalMoves - 1 && currentMove.from.row == ( pawn.color() == PieceColor.BLACK ? 5 : 4) ) ) 
                     p.removeMove( currentMove );
             } else 
                 p.removeMove( currentMove );
@@ -319,13 +322,33 @@ class Board {
         
         Move m = new Move( from, to );
 
-        for ( Move move : moves )
+        for ( Move move : moves ){
+            System.out.println( move + "\t" + move.moveType );
             if ( move.equals( m ) )
                 return true;
-
+        }
         return false;
 
     }
+
+    private Cell findKing( PieceColor color ) {
+        return null;
+    }
+
+    /**
+     * Returns whether one of the players are check.
+     */
+    public boolean isCheck() {
+        return false;
+    }
+
+    /**
+     * Returns whether the game is over or not.
+     */
+    public boolean isGameOver() {
+        return false;
+    }
+
 
     /**
      * This method puts Xs on the board where it is possible to move the selected Piece.
@@ -344,9 +367,25 @@ class Board {
      * @param cell The Cell containing the Piece
      * @return the color of the given Piece or null if the Cell is empty.
      */
-    public String color( Cell cell ) {
+    public PieceColor color( Cell cell ) {
         Piece piece = getPiece( cell );
         return piece == null ? null : piece.color();
+    }
+
+    /**
+     * This method takes in a Move, and returns a new Move with the correct moveType.
+     * @param fromCell the Piece located in the cell
+     * @param toCell the cell to move the Piece
+     * @return The same Move, but with correct moveType.
+     */
+    public Move getMoveWithType( Cell fromCell, Cell toCell ) {
+        List< Move > moves = getLegalMoves( fromCell );
+        Move selectedMove = new Move( fromCell, toCell );
+        for ( Move move : moves ) {
+            if ( move.from.equals( fromCell ) && move.to.equals( toCell ) )
+                selectedMove = move;
+        }
+        return selectedMove;
     }
 
     /**
@@ -355,7 +394,6 @@ class Board {
      * @param move The Move that is to be made.
      */
     public void move( Move move ) {
-        prev = copy().board;
         Cell from = move.from;
         Cell to = move.to;
         Piece fromPiece = getPiece( from ); 
@@ -363,37 +401,34 @@ class Board {
         if ( fromPiece instanceof Pawn ) {
             Pawn fp = (Pawn) fromPiece;
             handleEnPassant( fp, move );
-            fp.plusMove();
         } else if ( fromPiece instanceof Rook ) {
             Rook fp = (Rook) fromPiece;
-            handleCastle( fp, move );
-            fp.plusMove();
-        } else if ( fromPiece instanceof King ) {
-            King fp = (King) fromPiece;
-            fp.plusMove();
+            to = handleCastle( fp, move ); // To will be raplced if the movetype is castleing
         }
 
+        ++totalMoves;
+        fromPiece.lastUsed( totalMoves );
         setPiece( to, fromPiece );
         setPiece( from, null );
+        
     }
 
-    private void handleCastle( Rook rook, Move move ) {
+    private Cell handleCastle( Rook rook, Move move ) {
         Piece target = getPiece( move.to );
-        char startCol = (rook.color().equals( "black" ) ? 'A' : 'H');
-        if ( !rook.hasMoved() && move.from.col == startCol && target != null && target.color().equals( rook.color() ) ) {
-            if ( target instanceof King ) {
-                King king = (King) target;
-                if ( !king.hasMoved() ) {
-                    // Perform castleing.
-                    setPiece( new Cell( startCol == 'A' ? 'C' : 'G', move.to.row ), king );
-                    setPiece( new Cell( startCol == 'A' ? 'D' : 'F', move.to.row ), rook );
+        char startCol = move.from.col;
+        if ( move.moveType == MoveType.CASTLEING ) {
+            King king = (King) target;
+            
+            // Perform castleing.
+            setPiece( new Cell( startCol == 'A' ? 'C' : 'G', move.to.row ), king );
+            setPiece( new Cell( startCol == 'A' ? 'D' : 'F', move.to.row ), rook );
 
-                    setPiece( move.to, null ); 
-                    setPiece( move.from, null ); // This will actually happen from caller.
+            setPiece( move.to, null ); 
+            setPiece( move.from, null ); // This will actually happen from caller.
 
-                }
-            }
+            return new Cell( startCol == 'A' ? 'D' : 'F', move.to.row );   
         }
+        return move.to;
     }
 
     /**
@@ -402,16 +437,9 @@ class Board {
      * @param move The Move that is being made.
      */
     private void handleEnPassant( Pawn fp, Move move ) {
-        fp.plusMove();
         fp.updateLastPos( move.from );
-        if ( move.from.col != move.to.col ) { // Attack
-            Cell side = new Cell( move.to.col, move.from.row );
-            if ( getPiece( side ) instanceof Pawn ) {
-                Pawn sidePawn = (Pawn) getPiece( side );
-                if ( sidePawn.lastPost().equals( new Cell( move.to.col, sidePawn.color().equals( "white" ) ? 7 : 2 ) ) && sidePawn.totalMoves() == 1 )
-                    setPiece( side, null ); // remove that piece.                    
-            }
-        } 
+        Cell side = new Cell( move.to.col, move.from.row );
+        setPiece( side, null ); // remove that piece.   
     }
 
     /**
@@ -422,7 +450,8 @@ class Board {
         Board b = new Board();
         for ( int i = 0; i < board[0].length; i++ ) {
             for ( int j = 0; j < board.length; j++ )
-                b.board[i][j] = board[i][j].copy();
+                if ( board[i][j] != null )
+                    b.board[i][j] = board[i][j].copy();
         }
         return b;
     }
@@ -431,6 +460,8 @@ class Board {
      * This method returns a textual representation of this board.
      */
     public String toString() {
+        String boardWhiteCell = "  "; //"\u2B1C"
+        String helperMarker = "\u2B1C";
         String s = "";
         int c = 0;
 

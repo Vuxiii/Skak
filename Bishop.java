@@ -2,17 +2,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop implements Piece {
-    private final String color;
+    private final PieceColor color;
+
+    private int lastMoved = 0;
 
     /**
      * Constructs a new Bishop with the given color.
      * @param color the color of this Piece.
      */
-    public Bishop( String color ) {
+    public Bishop( PieceColor color ) {
         this.color = color;
     }
 
-    public String color() {
+    public PieceColor color() {
         return color;
     }
     
@@ -68,6 +70,16 @@ public class Bishop implements Piece {
     }
 
     public String toString() {
-        return !color.equals( "black" ) ? "♝" : "♗";
+        return color != PieceColor.BLACK ? "♝" : "♗";
+    }
+
+    @Override
+    public void lastUsed(int tick) {
+        lastMoved = tick;
+    }
+
+    @Override
+    public int lastUsed() {
+        return lastMoved;
     }
 }

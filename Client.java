@@ -33,7 +33,7 @@ public class Client {
                 System.out.println( board );
             }
             Cell toCell = getToCell( fromCell );
-            Move move = new Move( fromCell, toCell );
+            Move move = board.getMoveWithType( fromCell, toCell );
             board.move( move );
             whiteTurn = !whiteTurn;
         }
@@ -43,8 +43,8 @@ public class Client {
      * This method returns the color of the current player.
      * @return "black" if current player is black, otherwise "white"
      */
-    public static String currentPlayer() {
-        return whiteTurn ? "white" : "black";
+    public static PieceColor currentPlayer() {
+        return whiteTurn ? PieceColor.WHITE : PieceColor.BLACK;
     }
 
     /**
@@ -54,18 +54,18 @@ public class Client {
      */
     public static Cell getToCell( Cell from ) {
         Cell toCell = null;
-        String cellColor = null;
+        PieceColor cellColor = null;
         do {
             if ( toCell != null )
-                if ( cellColor != null && cellColor.equals( currentPlayer() ) )
+                if ( cellColor != null && cellColor == currentPlayer() )
                     System.out.println( "You can not kill your own Pieces!" );
                 else
                     System.out.println( "You can not move " + from + " to cell " + toCell );
                 
             toCell = getCell( "Where do you want to move " + from + " to?\n> " );
             cellColor = board.color( toCell );
-        } while( !(cellColor == null || !cellColor.equals( currentPlayer()) ) || !board.isLegalMove( from, toCell ) );
-
+        } while( !( board.isLegalMove( from, toCell ) ) ); //  || !cellColor.equals( currentPlayer()) )
+        System.out.println( board.isLegalMove( from, toCell ) );
         return toCell;
     }
 
@@ -75,12 +75,12 @@ public class Client {
      */
     public static Cell getFromMove() {
         Cell fromCell = null;
-        String cellColor = null;
+        PieceColor cellColor = null;
         do {
             if ( fromCell != null )
                 if ( cellColor == null )
                     System.out.println( "You selected a Cell with no Pieces in it." );
-                else if ( !cellColor.equals( currentPlayer() ) )
+                else if ( cellColor != currentPlayer() )
                     System.out.println( "You selected your opponent's Piece. Make sure to select your own!" );
                 else
                     System.out.println( "You have selected a Piece with no valid Moves!" );

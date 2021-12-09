@@ -7,7 +7,7 @@ public interface Piece {
      * This metod returns the color of this piece.
      * @return The color of this Piece. "black" | "white"
      */
-    public String color();
+    public PieceColor color();
 
     /**
      * This method returns a copy of this Piece.
@@ -31,4 +31,17 @@ public interface Piece {
      * @return A list of moves where this Piece can possibly move.
      */
     public List< Path > getMoves( Cell pos );
+
+    /**
+     * This method updates the the last tick that this Piece has been moved.
+     * @param tick the total amount of moves made so far for the entire game.
+     */
+    public void lastUsed( int tick );
+
+    /**
+     * This method returns the last tick this Piece was moved.
+     * If the Piece hasn't moved at all this game, returns 0
+     * @return the tick this Piece was moved.
+     */
+    public int lastUsed();
 }

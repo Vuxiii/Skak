@@ -1,21 +1,22 @@
 public class Move {
     public final Cell from;
     public final Cell to;
-    public final String moveType;
+    public final MoveType moveType;
     /**
      * This constructor constructs a new move representing moving a piece from 'from' to 'to'
      */
     public Move( Cell from, Cell to ) {
         this.from = from;
         this.to = to;
-        
-        moveType = "regular";
+
+        moveType = MoveType.REGULAR;
     }
 
     /**
-     * This constructor constructs a new move representing moving a piece from 'from' to 'to'
+     * This constructor constructs a new move representing moving a piece from 'from' to 'to' and the given moveType.
+     * 
      */
-    public Move( Cell from, Cell to, String moveType ) {
+    public Move( Cell from, Cell to, MoveType moveType ) {
         this.from = from;
         this.to = to;
         this.moveType = moveType;

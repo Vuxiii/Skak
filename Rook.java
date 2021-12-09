@@ -2,31 +2,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rook implements Piece {
-    private final String color;
-    private int totalMoves = 0;
+    private final PieceColor color;
+    private int lastMoved = 0;
 
     /**
      * Constructs a new Rook with the given color.
      * @param color the color of this Piece.
      */
-    public Rook( String color ) {
+    public Rook( PieceColor color ) {
         this.color = color;
     }
 
-    /**
-     * This method increments the counter that tracks how many times this King has moved. Used for Castleing.
-     */
-    public void plusMove() {
-        totalMoves++;
+    public PieceColor color() {
+        return color;
     }
 
-    /**
-     * This method checks whether this King has moved. Used for Castleing.
-     * @return true if this King has moved.
-     */
-    public boolean hasMoved() {
-        return totalMoves > 0;
-    }
     
     public static List< Path > getPossibleMoves( Cell pos ) {
         // List< Move > moves = new ArrayList<>();
@@ -71,17 +61,23 @@ public class Rook implements Piece {
 
 
 
-    public String color() {
-        return color;
-    }
-
+    
     public Piece copy() {
         Rook rook = new Rook( color );
-        rook.totalMoves = totalMoves;
         return rook;
     }
 
     public String toString() {
-        return !color.equals( "black" ) ? "♜" : "♖";
+        return color != PieceColor.BLACK ? "♜" : "♖";
+    }
+
+    @Override
+    public void lastUsed(int tick) {
+        lastMoved = tick;
+    }
+
+    @Override
+    public int lastUsed() {
+        return lastMoved;
     }
 }
