@@ -22,16 +22,22 @@ public class Client {
             }
 
             System.out.println( "It is " + currentPlayer() + " player's turn!" );
-            
-            Cell fromCell = getFromMove();
-            if ( displayHelperMarkers ) {
-                board.helperMarkers( fromCell );
-                System.out.println( board );
+            Move move;
+            if ( currentPlayer() == PieceColor.BLACK ) {
+                move = Minimax.next( board, 3, currentPlayer() );
+                System.out.println( "The AI has chosen\n> " + move );
+            } else {
+                Cell fromCell = getFromMove();
+                if ( displayHelperMarkers ) {
+                    board.helperMarkers( fromCell );
+                    System.out.println( board );
+                }
+                Cell toCell = getToCell( fromCell );
+                move = board.getMoveWithType( fromCell, toCell );
             }
-            Cell toCell = getToCell( fromCell );
-            Move move = board.getMoveWithType( fromCell, toCell );
             board.move( move );
             whiteTurn = !whiteTurn;
+            
         }
     }
 

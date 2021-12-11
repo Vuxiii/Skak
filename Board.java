@@ -155,7 +155,7 @@ class Board {
      * @param cell the Cell on the Board where the Piece is located.
      * @return the Piece in the given Cell
      */
-    private Piece getPiece( Cell cell ) {
+    public Piece getPiece( Cell cell ) {
         return board[ cell.row - 1 ][ charToInt.get( cell.col ) - 1 ];
     }
 
@@ -169,6 +169,17 @@ class Board {
         Piece ret = getPiece( cell );
         board[ cell.row - 1 ][ charToInt.get( cell.col ) - 1 ] = newPiece;
         return ret;
+    }
+
+    public List< Piece > getPieces( PieceColor color ) {
+        List< Piece > pieces = new ArrayList<>();
+        for ( Piece[] row : board ) {
+            for ( Piece p : row ) {
+                if ( p != null && p.color() == color )
+                    pieces.add( p );
+            }
+        }
+        return pieces;
     }
 
     /**
@@ -191,7 +202,9 @@ class Board {
             legalMovesForBlack = potMoves;
         else
             legalMovesForWhite = potMoves;
-
+        for ( Move move : potMoves )
+            if ( getPiece( move.from ) == null )
+                System.out.println( "Wtf");
         return potMoves;
     }
 
