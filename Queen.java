@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Queen implements Piece {
     private final PieceColor color;
     private int lastMoved = 0;

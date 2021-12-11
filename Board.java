@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 
+
 class Board {
 
     private boolean checkForCheck = true; // This boolean is used to check if a king is endangered.

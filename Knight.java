@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +19,6 @@ public class Knight implements Piece {
     }
     
     public static List< Path > getPossibleMoves( Cell pos ) {
-        // List< Move > moves = new ArrayList<>();
-        
         List< Path > paths = new ArrayList<>();
 
         // Check left bound
@@ -27,7 +26,6 @@ public class Knight implements Piece {
             if ( pos.row > 1 ) {
                 // We can make left2 up jump
                 Cell left2Up = new Cell( (char) (pos.col - 2), pos.row - 1 ); 
-                // moves.add( new Move( pos, left2Up ) );
                 
                 paths.add( new Path() );
                 paths.get( paths.size() - 1 ).addMove( new Move( pos, left2Up ) );
@@ -36,7 +34,7 @@ public class Knight implements Piece {
             if ( pos.row < 8 ) {
                 // We can make left2 down jump
                 Cell left2Down = new Cell( (char) (pos.col - 2), pos.row + 1 ); 
-                // moves.add( new Move( pos, left2Down ) );
+                
                 
                 paths.add( new Path() );
                 paths.get( paths.size() - 1 ).addMove( new Move( pos, left2Down ) );

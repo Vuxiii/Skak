@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Bishop implements Piece {
     private final PieceColor color;
 

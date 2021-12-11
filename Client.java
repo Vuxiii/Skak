@@ -13,7 +13,6 @@ public class Client {
     public static void main( String[] args ) {
 
         board = new Board();
-
         while( runGame ) {
             
             System.out.println( board );

@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class King implements Piece {
     private final PieceColor color;
 
