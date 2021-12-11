@@ -17,16 +17,12 @@ public class Client {
         while( runGame ) {
             
             System.out.println( board );
-            // System.out.println( "----------------");
-            // System.out.println( board.isCheck( PieceColor.BLACK ) );
-            // System.out.println( board.isCheck( PieceColor.WHITE ) );
-            // System.out.println( "----------------");
-            // if ( board.isGameOver( currentPlayer() ) ) {
-            //     System.out.println( currentPlayer() + " lost." );
-            //     System.exit( 0 );
-            // }
+            if ( board.isGameOver( currentPlayer() ) ) {
+                System.out.println( currentPlayer() + " lost." );
+                System.exit( 0 );
+            }
 
-            System.out.println( "It is " + (whiteTurn ? "White" : "Black") + " player's turn!" );
+            System.out.println( "It is " + currentPlayer() + " player's turn!" );
             
             Cell fromCell = getFromMove();
             if ( displayHelperMarkers ) {

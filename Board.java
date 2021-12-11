@@ -15,6 +15,9 @@ class Board {
 
     private Set< Cell > markers;
 
+    private List< Move > legalMovesForWhite = null;
+    private List< Move > legalMovesForBlack = null;
+
     private int totalMoves = 0; // Used for en pessant.
 
     public Board() {
@@ -171,27 +174,46 @@ class Board {
      * This method returns a List of legal moves that are possible based on the current Board.
      */
     public List< Move > getLegalMoves( PieceColor currentPlayer ) {
+        if ( currentPlayer == PieceColor.BLACK && legalMovesForBlack != null )
+            return legalMovesForBlack;
+        if ( currentPlayer == PieceColor.WHITE && legalMovesForWhite != null )
+            return legalMovesForWhite;
+        
         List< Path > possiblePaths = retrieveAllPaths( currentPlayer );
 
         removeIllegalMoves( possiblePaths );
         List< Move > potMoves = Path.extractMoves( possiblePaths );
         
+        removeMovesCausingSelfCheck( currentPlayer, potMoves );
+        
+        if ( currentPlayer == PieceColor.BLACK )
+            legalMovesForBlack = potMoves;
+        else
+            legalMovesForWhite = potMoves;
+
+        return potMoves;
+    }
+
+    /**
+     * This method removes any moves that will cause the current player to become check, thus making the move illegal.
+     * This method is only executed on the actual Board. Not the Board that this method creates. Thus avoiding infinite recursion.
+     * @param currentPlayer The player making the move.
+     * @param potMoves The list of Moves that potentially has illegal Moves in it.
+     */
+    private void removeMovesCausingSelfCheck( PieceColor currentPlayer, List< Move > potMoves ) {
         if ( checkForCheck ) {
             for ( int i = potMoves.size()-1; i >= 0; --i ) {
                 Move move = potMoves.get( i );
                 Board nextBoard = copy();
                 nextBoard.checkForCheck = false;
                 nextBoard.move( move );
-                System.out.println( nextBoard.toString() );
                 if ( nextBoard.isCheck( currentPlayer ) ) {
-                    System.out.println( move + " was deleted." );
                     potMoves.remove( i );
                 }
             }
         }
-        
-        return potMoves;
     }
+
     /**
      * This method computes all possible paths for each Piece on the Board.
      * It does not do any sorting.
@@ -366,12 +388,9 @@ class Board {
 
         List< Move > moves = getLegalMoves( color == PieceColor.BLACK ? PieceColor.WHITE : PieceColor.BLACK );
 
-        for ( Move move : moves ) {
-            if ( move.to.equals( kingLocation ) ) {
-                // System.out.println( toString() );
+        for ( Move move : moves )
+            if ( move.to.equals( kingLocation ) )
                 return true;
-            }
-        }
         return false;
     }
 
@@ -404,7 +423,6 @@ class Board {
         }
         return true;
     }
-
 
     /**
      * This method puts Xs on the board where it is possible to move the selected Piece.
@@ -466,7 +484,9 @@ class Board {
         fromPiece.lastUsed( totalMoves );
         setPiece( to, fromPiece );
         setPiece( from, null );
-        
+
+        legalMovesForBlack = null;
+        legalMovesForWhite = null;
     }
 
     private Cell handleCastle( Rook rook, Move move ) {
