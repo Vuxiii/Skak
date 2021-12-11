@@ -107,6 +107,7 @@ public class Knight implements Piece {
     
     public Piece copy() {
         Knight knight = new Knight( color );
+        knight.lastMoved = lastMoved;
         return knight;
     }
 

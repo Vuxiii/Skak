@@ -86,6 +86,7 @@ public class Pawn implements Piece {
     
     public Piece copy() {
         Pawn pawn = new Pawn( color, lastPos );
+        pawn.lastMoved = lastMoved;
         return pawn;
     }
 

@@ -62,6 +62,7 @@ public class Bishop implements Piece {
     
     public Piece copy() {
         Bishop bishop = new Bishop( color );
+        bishop.lastMoved = lastMoved;
         return bishop;
     }
 

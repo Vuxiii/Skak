@@ -25,6 +25,35 @@ public class King implements Piece {
         Path down = new Path();
         Path left = new Path();
         Path right = new Path();
+        Path leftUp = new Path();
+        Path leftDown = new Path();
+        Path rightUp = new Path();
+        Path rightDown = new Path();
+
+        // left up
+        if ( pos.row != 1 && pos.col != 'A' ) {
+            Cell to = new Cell( (char) (pos.col - 1), pos.row - 1 );
+            leftUp.addMove( new Move( pos, to ) );
+        }
+        
+        // left down
+        if ( pos.row != 8 && pos.col != 'A' ) {
+            Cell to = new Cell( (char) (pos.col - 1), pos.row + 1 );
+            leftDown.addMove( new Move( pos, to ) );
+        }
+        
+        // right down
+        if ( pos.row != 8 && pos.col != 'H' ) {
+            Cell to = new Cell( (char) (pos.col + 1), pos.row + 1 );
+            rightDown.addMove( new Move( pos, to ) );
+        }
+
+        // right up
+        if ( pos.row != 1 && pos.col != 'H' ) {
+            Cell to = new Cell( (char) (pos.col + 1), pos.row - 1 );
+            rightUp.addMove( new Move( pos, to ) );
+        }
+
         // Check upper bound of board.
         if ( pos.row != 1 ) {
             Cell to = new Cell( pos.col, pos.row - 1 );
@@ -51,6 +80,10 @@ public class King implements Piece {
         paths.add( down );
         paths.add( left );
         paths.add( right );
+        paths.add( rightUp );
+        paths.add( rightDown );
+        paths.add( leftUp );
+        paths.add( leftDown );
         return paths;
     }
     
@@ -60,6 +93,7 @@ public class King implements Piece {
 
     public Piece copy() {
         King king = new King( color );
+        king.lastMoved = lastMoved;
         return king;
     }
 

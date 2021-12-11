@@ -7,13 +7,11 @@ import java.util.List;
 
 class Board {
 
-    
+    private boolean checkForCheck = true; // This boolean is used to check if a king is endangered.
 
     private Map< Character, Integer > charToInt; 
 
     private Piece[][] board;
-
-    private boolean dbg = false; // debug.
 
     private Set< Cell > markers;
 
@@ -27,15 +25,8 @@ class Board {
         initPieces();
 
         markers = new HashSet< Cell >();
-        
-        //List< Move > moves = getLegalMoves();
-        //printMoves( moves );
     }
 
-    private void debug( String msg ) {
-        if (dbg)
-            System.out.print( msg );
-    }
 
     /**
      * This method prints all of the Moves from the given list
@@ -179,27 +170,40 @@ class Board {
     /**
      * This method returns a List of legal moves that are possible based on the current Board.
      */
-    public List< Move > getLegalMoves() {
-        
-        List< Path > possiblePaths = retrieveAllPaths();
+    public List< Move > getLegalMoves( PieceColor currentPlayer ) {
+        List< Path > possiblePaths = retrieveAllPaths( currentPlayer );
 
         removeIllegalMoves( possiblePaths );
-
-        return Path.extractMoves( possiblePaths );
+        List< Move > potMoves = Path.extractMoves( possiblePaths );
+        
+        if ( checkForCheck ) {
+            for ( int i = potMoves.size()-1; i >= 0; --i ) {
+                Move move = potMoves.get( i );
+                Board nextBoard = copy();
+                nextBoard.checkForCheck = false;
+                nextBoard.move( move );
+                System.out.println( nextBoard.toString() );
+                if ( nextBoard.isCheck( currentPlayer ) ) {
+                    System.out.println( move + " was deleted." );
+                    potMoves.remove( i );
+                }
+            }
+        }
+        
+        return potMoves;
     }
-
     /**
      * This method computes all possible paths for each Piece on the Board.
      * It does not do any sorting.
      * @return a List with all possible path for each Piece on the Board.
      */
-    private List< Path > retrieveAllPaths() {
+    private List< Path > retrieveAllPaths( PieceColor currentPlayer ) {
         List< Path > possiblePaths = new ArrayList<>();
 
         for ( int row = 0; row < board.length; row++ ) {
             for ( int col = 0; col < board[0].length; col++ ) {
                 Piece p = board[ row ][ col ];
-                if ( p != null ) {
+                if ( p != null && p.color() == currentPlayer ) {
                     Cell pos = new Cell( (char) ( col + 'A' ), 1 + row );
                     possiblePaths.addAll( p.getMoves( pos ) );
                 }
@@ -259,7 +263,7 @@ class Board {
      */
     private void removeIllegalMovesForPawn( Piece from, Piece target, Move currentMove, Path p ) {
         Pawn pawn = (Pawn) from;
-        System.out.println( pawn.lastUsed() );
+        // System.out.println( pawn.lastUsed() );
         // Check infront.
         if ( target != null && currentMove.to.col == currentMove.from.col && Math.abs( currentMove.to.row - currentMove.from.row ) == 1 ) {
             p.removeMove( currentMove ); // The piece infront this Pawn blocks it's path.   
@@ -288,12 +292,18 @@ class Board {
      */
     private List< Move > getLegalMoves( Cell cell ) {
         
-        Piece piece = getPiece( cell );
-        List< Path > paths = piece.getMoves( cell );
-        removeIllegalMoves( paths );
-        List< Move > moves = new ArrayList<>();
-        for ( Path p : paths )
-            moves.addAll( p.moves() );
+        // Piece piece = getPiece( cell );
+        // List< Path > paths = piece.getMoves( cell );
+        // removeIllegalMoves( paths );
+        // List< Move > moves = new ArrayList<>();
+        // for ( Path p : paths )
+        //     moves.addAll( p.moves() );
+        // System.out.println( "I WAS CALLED" );
+        List< Move > moves = getLegalMoves( getPiece( cell ).color() );
+        for ( int i = moves.size()-1; i >= 0; --i ) {
+            if ( !moves.get(i).from.equals( cell ) )
+                moves.remove( i );
+        }
 
         return moves;
     }
@@ -313,6 +323,7 @@ class Board {
     /**
      * Checks if the given move is valid.
      * Precondition: Cell from != null
+     * Precondition: The king of the current player is not in check.
      * @param from The Cell which contains the Piece that wants to move
      * @param to The Cell where the Piece wants to move to.
      * @return Whether or not the given move is legal
@@ -323,7 +334,7 @@ class Board {
         Move m = new Move( from, to );
 
         for ( Move move : moves ){
-            System.out.println( move + "\t" + move.moveType );
+            // System.out.println( move + "\t" + move.moveType );
             if ( move.equals( m ) )
                 return true;
         }
@@ -331,22 +342,67 @@ class Board {
 
     }
 
+    /**
+     * Returns the Cell containing the King of the specified color.
+     * @param color The color of the king.
+     * @return Returns the Cell where the king of the specified color is located.
+     */
     private Cell findKing( PieceColor color ) {
+        for ( int row = 1; row <= 8; ++row ) {
+            for ( char col = 'A'; col <= 'H'; ++col )
+                if ( getPiece( new Cell( col, row ) ) instanceof King && getPiece( new Cell( col, row ) ).color() == color )
+                    return new Cell( col, row );
+        }
         return null;
     }
 
     /**
      * Returns whether one of the players are check.
+     * @param color The color of the king to check.
+     * @return True if the king of the specified color is in check.
      */
-    public boolean isCheck() {
+    public boolean isCheck( PieceColor color ) {
+        Cell kingLocation = findKing( color );
+
+        List< Move > moves = getLegalMoves( color == PieceColor.BLACK ? PieceColor.WHITE : PieceColor.BLACK );
+
+        for ( Move move : moves ) {
+            if ( move.to.equals( kingLocation ) ) {
+                // System.out.println( toString() );
+                return true;
+            }
+        }
         return false;
+    }
+
+    /**
+     * Checks whther the given move makes the player un-checked.
+     * Precondition: The given Move is valid.
+     * @param move The move to check for.
+     * @return True if the given Move makes the player un-checked.
+     */
+    public boolean moveUnchecks( Move move, PieceColor currentPlayer ) {
+        Board nextBoard = copy();
+        nextBoard.move( move );
+        return nextBoard.isCheck( currentPlayer );
     }
 
     /**
      * Returns whether the game is over or not.
      */
-    public boolean isGameOver() {
-        return false;
+    public boolean isGameOver( PieceColor currentPlayer ) {
+        if ( !isCheck( currentPlayer ) )
+            return false;
+        
+        PieceColor removeColor = currentPlayer == PieceColor.BLACK ? PieceColor.WHITE : PieceColor.BLACK;
+        List< Move > moves = getLegalMoves( removeColor );
+        
+        // Checks if any of the moves left can un-check the current player.
+        for ( Move move : moves ) {
+            if ( moveUnchecks( move, currentPlayer ) )
+                return false;
+        }
+        return true;
     }
 
 
@@ -448,11 +504,10 @@ class Board {
      */
     public Board copy() {
         Board b = new Board();
-        for ( int i = 0; i < board[0].length; i++ ) {
+        for ( int i = 0; i < board[0].length; i++ )
             for ( int j = 0; j < board.length; j++ )
-                if ( board[i][j] != null )
-                    b.board[i][j] = board[i][j].copy();
-        }
+                b.board[i][j] = (board[i][j] == null) ? null : board[i][j].copy();
+        
         return b;
     }
 

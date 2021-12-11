@@ -32,6 +32,7 @@ public class Queen implements Piece {
 
     public Piece copy() {
         Queen queen = new Queen( color );
+        queen.lastMoved = lastMoved;
         return queen;
     }
 

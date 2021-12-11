@@ -1,13 +1,5 @@
 import java.util.Scanner;
 
-// Added enum MoveType. Add these so it will be easier later.... Hard work naw ;(
-
-// Skak, skak mat
-
-// Castle
-
-// End game
-
 public class Client {
     static Scanner in = new Scanner( System.in );
     static boolean whiteTurn = true;
@@ -25,6 +17,15 @@ public class Client {
         while( runGame ) {
             
             System.out.println( board );
+            // System.out.println( "----------------");
+            // System.out.println( board.isCheck( PieceColor.BLACK ) );
+            // System.out.println( board.isCheck( PieceColor.WHITE ) );
+            // System.out.println( "----------------");
+            // if ( board.isGameOver( currentPlayer() ) ) {
+            //     System.out.println( currentPlayer() + " lost." );
+            //     System.exit( 0 );
+            // }
+
             System.out.println( "It is " + (whiteTurn ? "White" : "Black") + " player's turn!" );
             
             Cell fromCell = getFromMove();
@@ -65,7 +66,7 @@ public class Client {
             toCell = getCell( "Where do you want to move " + from + " to?\n> " );
             cellColor = board.color( toCell );
         } while( !( board.isLegalMove( from, toCell ) ) ); //  || !cellColor.equals( currentPlayer()) )
-        System.out.println( board.isLegalMove( from, toCell ) );
+        // System.out.println( board.isLegalMove( from, toCell ) );
         return toCell;
     }
 

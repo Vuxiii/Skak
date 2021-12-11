@@ -64,6 +64,7 @@ public class Rook implements Piece {
     
     public Piece copy() {
         Rook rook = new Rook( color );
+        rook.lastMoved = lastMoved;
         return rook;
     }
 
